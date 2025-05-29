@@ -6,7 +6,7 @@ const Logo = () => {
     <div
       className={`text-2xl lg:text-3xl ${roboto.className} font-bold mx-auto`}
     >
-      Smart <span className="text-primary font-bold">Stack</span>
+      Smart <span className="text-primary font-bold">Stock</span>
     </div>
   );
 };

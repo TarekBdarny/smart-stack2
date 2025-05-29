@@ -10,15 +10,17 @@ import {
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { ThemeSwitcher } from "../ThemeSwithcer";
+import Logo from "../Logo";
 
-const Navbar = async () => {
+const Navbar = () => {
   return (
     <>
       <div
         className={`w-full h-16 flex items-center px-4 justify-between py-4`}
       >
-        <div>
-          <SidebarTrigger />
+        <div className="flex gap-4 items-center">
+          <SidebarTrigger className="cursor-pointer" />
+          <Logo />
         </div>
         <div className="flex gap-4">
           <div>
@@ -29,7 +31,7 @@ const Navbar = async () => {
               <UserButton />
             </SignedIn>
             <SignedOut>
-              <Button asChild variant={"action"}>
+              <Button asChild>
                 <SignInButton mode="modal" />
               </Button>
               <Button

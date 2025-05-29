@@ -30,7 +30,7 @@ const PlanStatus = v.union(
 const PlanType = v.union(v.literal("Starter"));
 
 export default defineSchema({
-  User: defineTable({
+  users: defineTable({
     email: v.string(),
     name: v.string(),
     avatar: v.optional(v.string()),

@@ -11,31 +11,25 @@ import {
 import React from "react";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { format } from "date-fns";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import Link from "next/link";
+import { format } from "date-fns";
 
 export type UserProps = {
-  id: string;
-  storeId?: string | null;
+  _id: string;
   avatar?: string | null;
   name: string;
   role: string;
-  createdAt: Date;
+  createdAt: number;
   email: string;
   address?: string | null;
   phoneNumber?: string | null;
+  clerkId: string;
   location?: string | null;
 };
-const UserCard = ({
-  user,
-  storeId,
-}: {
-  user: UserProps;
-  storeId?: string | null;
-}) => {
+const UserCard = ({ user, store }: { user: UserProps; store: boolean }) => {
   if (!user) return;
   const getRoleColor = (role: string): string => {
     const roleColors: { [key: string]: string } = {
@@ -96,7 +90,7 @@ const UserCard = ({
               <div className="flex items-center gap-4 mt-3 text-xs text-slate-400">
                 <div className="flex items-center gap-1">
                   <Store className="w-3 h-3" />
-                  <span>{storeId ? 1 : 0} stores</span>
+                  <span>{store ? 1 : 0}</span>
                 </div>
               </div>
             </div>
@@ -146,12 +140,12 @@ const UserCard = ({
               <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Calendar className="w-4 h-4 text-orange-400" />
               </div>
-              {/* <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0">
                 <p className="text-xs text-slate-400 mb-1">Member Since</p>
                 <p className="text-sm text-white font-medium">
                   {format(new Date(user?.createdAt), "PPP")}
                 </p>
-              </div> */}
+              </div>
             </div>
           </div>
 
@@ -164,7 +158,7 @@ const UserCard = ({
               size="lg"
               asChild
             >
-              <Link href={`/profile/${user?.id}`}>
+              <Link href={`/profile/${user?._id}`}>
                 <UserIcon className="w-4 h-4 mr-2" />
                 View Full Profile
               </Link>

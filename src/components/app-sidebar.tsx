@@ -28,6 +28,8 @@ import {
 
 import { getNavItemsByRole } from "@/lib";
 import { generalItems } from "@/constants";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 // This is sample data.
 const data = {
@@ -161,8 +163,8 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navItems = getNavItemsByRole("CUSTOMER");
+  const user = useQuery(api.users.current);
 
-  // if (!user) return;
   return (
     <>
       <Sidebar collapsible="icon" {...props}>
@@ -174,7 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <NavProjects projects={generalItems} />
         </SidebarContent>
         <SidebarFooter>
-          <NavUser user={data.user} />
+          <NavUser user={user} />
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
