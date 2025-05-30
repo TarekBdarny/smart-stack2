@@ -1,15 +1,20 @@
 // import { v } from "convex/values";
 import { query } from "./_generated/server";
+import { getCurrentUser } from "./users";
 
-export const getStoreById = query({
+export const getStoreForLoggedUser = query({
   args: {},
   handler: async (ctx) => {
-    const stores = await ctx.db.query("Store").collect();
-    return Promise.all(
-      stores.map(async (store) => {
-        const owner = await ctx.db.get(store.ownerId);
-        return { ...store, owner };
-      })
-    );
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      console.warn("No user found");
+      return null;
+    }
+    console.log(user._id);
+    const userStore = await ctx.db
+      .query("Store")
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
+      .first();
+    return userStore;
   },
 });

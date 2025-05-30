@@ -1,4 +1,9 @@
-import { internalMutation, query, QueryCtx } from "./_generated/server";
+import {
+  internalMutation,
+  mutation,
+  query,
+  QueryCtx,
+} from "./_generated/server";
 import { UserJSON } from "@clerk/backend";
 import { v, Validator } from "convex/values";
 // export const createUser = mutation({
@@ -128,5 +133,13 @@ export const getUserByName = query({
       .query("users")
       .withIndex("by_name", (q) => q.eq("name", name))
       .unique();
+  },
+});
+export const deleteUser = mutation({
+  args: { id: v.id("users") },
+  handler: async (ctx, { id }) => {
+    const user = await ctx.db.get(id);
+    if (!user) throw new Error("User not found");
+    return await ctx.db.delete(id);
   },
 });

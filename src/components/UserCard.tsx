@@ -1,11 +1,13 @@
 import {
   Calendar,
+  LucideIcon,
   Mail,
   MapPin,
   Phone,
   Shield,
   Star,
   Store,
+  Trash,
   UserIcon,
 } from "lucide-react";
 import React from "react";
@@ -50,8 +52,6 @@ const UserCard = ({ user, store }: { user: UserProps; store: boolean }) => {
         {/* Glass overlay */}
         <div className="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
 
-        {/* Online status indicator */}
-
         <CardHeader className="relative z-10 pb-2">
           {/* Header section with avatar and basic info */}
           <div className="flex items-start gap-4">
@@ -71,10 +71,17 @@ const UserCard = ({ user, store }: { user: UserProps; store: boolean }) => {
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center justify-between gap-2 mb-2">
                 <h3 className="text-xl font-bold text-white truncate">
                   {user?.name}
                 </h3>
+                <Button
+                  variant={"ghost"}
+                  className="hover:text-destructive"
+                  size={"sm"}
+                >
+                  <Trash />
+                </Button>
               </div>
 
               <Badge
@@ -90,7 +97,7 @@ const UserCard = ({ user, store }: { user: UserProps; store: boolean }) => {
               <div className="flex items-center gap-4 mt-3 text-xs text-slate-400">
                 <div className="flex items-center gap-1">
                   <Store className="w-3 h-3" />
-                  <span>{store ? 1 : 0}</span>
+                  <span>Owns {store ? 1 : 0} store</span>
                 </div>
               </div>
             </div>
@@ -100,53 +107,30 @@ const UserCard = ({ user, store }: { user: UserProps; store: boolean }) => {
         <CardContent className="relative z-10">
           {/* Contact information */}
           <div className="space-y-3 mb-6">
-            <div className="group flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 border border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Mail className="w-4 h-4 text-blue-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-400 mb-1">Email</p>
-                <p className="text-sm text-white truncate font-medium">
-                  {user?.email}
-                </p>
-              </div>
-            </div>
-
-            <div className="group flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 border border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Phone className="w-4 h-4 text-green-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-400 mb-1">Phone</p>
-                <p className="text-sm text-white font-medium">
-                  {user.phoneNumber ? user.phoneNumber : "No phone number yet."}
-                </p>
-              </div>
-            </div>
-
-            <div className="group flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 border border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <MapPin className="w-4 h-4 text-purple-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-400 mb-1">Location</p>
-                <p className="text-sm text-white font-medium">
-                  {user.location ? user.location : "No location yet."}
-                </p>
-              </div>
-            </div>
-
-            <div className="group flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 border border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Calendar className="w-4 h-4 text-orange-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-400 mb-1">Member Since</p>
-                <p className="text-sm text-white font-medium">
-                  {format(new Date(user?.createdAt), "PPP")}
-                </p>
-              </div>
-            </div>
+            <CardContentItem
+              Icon={Mail}
+              label="email"
+              value={user.email}
+              iconColor="text-blue-400"
+            />
+            <CardContentItem
+              Icon={Phone}
+              iconColor="text-green-400"
+              label="Phone"
+              value={user.phoneNumber || "No phone number yet."}
+            />
+            <CardContentItem
+              Icon={MapPin}
+              iconColor="text-purple-400"
+              label="Location"
+              value={user.location || "No location yet."}
+            />
+            <CardContentItem
+              Icon={Calendar}
+              iconColor="text-orange-400"
+              label="Member Since"
+              value={format(new Date(user?.createdAt), "PPP")}
+            />
           </div>
 
           <Separator className="bg-white/10 mb-6" />
@@ -175,3 +159,27 @@ const UserCard = ({ user, store }: { user: UserProps; store: boolean }) => {
 };
 
 export default UserCard;
+
+const CardContentItem = ({
+  label,
+  value,
+  Icon,
+  iconColor,
+}: {
+  label: string;
+  value: string;
+  Icon: LucideIcon;
+  iconColor: string;
+}) => {
+  return (
+    <div className="group flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 border border-white/10">
+      <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+        <Icon className={`w-4 h-4 ${iconColor}`} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-slate-400 mb-1">{label}</p>
+        <p className="text-sm text-white truncate font-medium">{value}</p>
+      </div>
+    </div>
+  );
+};
