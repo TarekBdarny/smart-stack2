@@ -10,7 +10,6 @@ export const getStoreForLoggedUser = query({
       console.warn("No user found");
       return null;
     }
-    console.log(user._id);
     const userStore = await ctx.db
       .query("Store")
       .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))

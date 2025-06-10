@@ -25,7 +25,6 @@ import { useQuery } from "convex/react";
 
 export function StoreSwitcher() {
   const userStore = useQuery(api.store.getStoreForLoggedUser);
-
   const { isMobile } = useSidebar();
 
   if (userStore === null) {

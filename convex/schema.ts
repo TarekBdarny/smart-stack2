@@ -67,9 +67,10 @@ export default defineSchema({
   StoreRequests: defineTable({
     requesterId: v.id("users"),
     responseById: v.optional(v.id("users")),
-    description: v.optional(v.string()),
+    cause: v.optional(v.string()), // Reason for rejection, if any
     storeName: v.string(),
     location: v.string(),
+    storeImage: v.optional(v.string()),
     workHours: v.string(),
     bio: v.string(),
     status: RequestStatus,
