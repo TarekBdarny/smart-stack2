@@ -14,7 +14,7 @@ import Logo from "../Logo";
 
 const Navbar = () => {
   return (
-    <>
+    <div className="sticky top-0 z-50 bg-background">
       <div
         className={`w-full h-16 flex items-center px-4 justify-between py-4`}
       >
@@ -31,7 +31,7 @@ const Navbar = () => {
               <UserButton />
             </SignedIn>
             <SignedOut>
-              <Button asChild>
+              <Button asChild variant={"action"}>
                 <SignInButton mode="modal" />
               </Button>
               <Button
@@ -46,7 +46,7 @@ const Navbar = () => {
         </div>
       </div>
       <Separator />
-    </>
+    </div>
   );
 };
 

@@ -7,6 +7,7 @@ import { Poppins } from "next/font/google";
 import Navbar from "@/components/navbar/Navbar";
 import { AppSidebar } from "@/components/app-sidebar";
 import Providers from "@/app/providers";
+import { Toaster } from "sonner";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default async function LocaleLayout({
             </div>
           </Providers>
         </NextIntlClientProvider>
+        <Toaster />
       </body>
     </html>
   );

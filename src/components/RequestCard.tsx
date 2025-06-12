@@ -1,25 +1,22 @@
 import { RequestCardType } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { Calendar, Clock, Mail, MapPin, Store, User } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Mail,
+  MapPin,
+  NotebookText,
+  Store,
+  User,
+} from "lucide-react";
 import React from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
-import Image from "next/image";
 import { Skeleton } from "./ui/skeleton";
+import RequestCardButton from "./RequestCardButton";
+import { Separator } from "./ui/separator";
 
 const requestDataCard = ({ requestData }: { requestData: RequestCardType }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "APPROVED":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "REJECTED":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
   return (
     <Card className="w-full">
       <CardHeader>
@@ -43,37 +40,48 @@ const requestDataCard = ({ requestData }: { requestData: RequestCardType }) => {
       </CardHeader>
       {/* store info */}
       <CardContent>
-        <div className="flex flex-col gap-4">
-          <div className="relative w-full h-[200px]">
-            <Image
-              src={requestData.storeImage || ""}
-              alt={requestData.storeName}
-              fill
-              style={{ objectFit: "cover" }}
-              quality={100}
-            />
-          </div>
-          <h3 className="text-xl font-semibold flex items-center">
-            <Store className="inline mr-1 text-primary" />
-            {requestData.storeName}
-          </h3>
-          <p className="break-words">{requestData.bio}</p>
-          <div className="flex items-center">
-            <Clock className="inline mr-3 text-purple-300 " />
-            <span className="font-semibold mr-2">Hours: </span>
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex flex-col gap-4 mt-5 ">
+            <h3 className="text-xl font-semibold flex items-center">
+              <Store className="inline mr-1 text-primary" />
+              {requestData.storeName}
+            </h3>
+            <div className="flex items-center">
+              <NotebookText className="inline mr-3 text-purple-300 " />
+              <span className="font-semibold mr-2">Bio: </span>
 
-            {" " + requestData.workHours}
+              {requestData.bio}
+            </div>
+            <div className="flex items-center">
+              <Clock className="inline mr-3 text-purple-300 " />
+              <span className="font-semibold mr-2">Hours: </span>
+
+              {" " + requestData.workHours}
+            </div>
+            <div className="flex items-center">
+              <MapPin className="inline mr-3 text-green-300 " />
+              <span className="font-semibold mr-2">Location: </span>
+              {" " + requestData.location}
+            </div>
           </div>
-          <div className="flex items-center">
-            <MapPin className="inline mr-3 text-green-300 " />
-            <span className="font-semibold mr-2">Location: </span>
-            {" " + requestData.location}
-          </div>
+          {requestData.storeImage ? (
+            <div className="relative  rounded-lg overflow-hidden">
+              <Avatar>
+                <AvatarImage
+                  src={requestData.storeImage}
+                  alt="store image"
+                  width={400}
+                />
+              </Avatar>
+            </div>
+          ) : (
+            <p>Request doesn&apos;t include a store image.</p>
+          )}
         </div>
       </CardContent>
       {/* admin response */}
       {requestData.responseBy ? (
-        <CardFooter className="flex flex-col items-start gap-4 w-full border  border-primary/80 bg-primary/10 rounded-lg p-4">
+        <CardFooter className="flex flex-col items-start gap-4 w-full border  border-primary/80 bg-primary/10 rounded-lg p-4 ">
           <p className="text-left">Responded by:</p>
           <RequestCardAvatar
             email={requestData.responseBy?.email}
@@ -89,6 +97,13 @@ const requestDataCard = ({ requestData }: { requestData: RequestCardType }) => {
         </CardFooter>
       ) : (
         <p className="p-4">No response yet</p>
+      )}
+      <Separator />
+      {requestData.status === "PENDING" && (
+        <div className="flex w-full items-center justify-between p-4 gap-4">
+          <RequestCardButton use="reject" requestId={requestData._id} />
+          <RequestCardButton use="approve" requestId={requestData._id} />
+        </div>
       )}
     </Card>
   );

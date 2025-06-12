@@ -46,6 +46,7 @@ export const StoreWithUserSchema = StoreWithoutUserSchema.extend({
   updatedAt: z.number().default(Date.now()),
 });
 export const RequestCardSchema = z.object({
+  _id: z.string(),
   bio: z.string(),
   storeName: z.string(),
   location: z.string(),

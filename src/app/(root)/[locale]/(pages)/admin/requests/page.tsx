@@ -19,7 +19,7 @@ const RequestsPage = () => {
       <p className="text-gray-600 mb-6">
         Here you can view and manage all store requests.
       </p>
-      <div className="grid grid-cols-1 ">
+      <div className="grid grid-cols-1 gap-4 ">
         {storeRequests?.map((storeRequest) => (
           <RequestCard
             key={storeRequest._id}

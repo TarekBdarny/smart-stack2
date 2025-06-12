@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getCurrentUser } from "./users";
+import { getCurrentUser, getCurrentUserOrThrow } from "./users";
 
 export const createStoreRequest = mutation({
   args: {
@@ -62,5 +62,86 @@ export const getStoreRequests = query({
         };
       })
     );
+  },
+});
+export const approveStoreRequest = mutation({
+  args: { requestId: v.id("StoreRequests") },
+  handler: async (ctx, { requestId }) => {
+    console.log(process.env.RESEND_API_KEY!);
+    const storeRequest = await ctx.db.get(requestId);
+
+    if (!storeRequest) {
+      return {
+        message: "Store request not found",
+        success: false,
+      };
+    }
+    const userRequest = await ctx.db.get(storeRequest.requesterId);
+    if (!userRequest) {
+      return {
+        message: "Requester not found",
+        success: false,
+      };
+    }
+
+    const adminUser = await getCurrentUserOrThrow(ctx);
+    await ctx.db.patch(storeRequest._id, {
+      status: "APPROVED",
+      responseById: adminUser._id,
+    });
+
+    // check if the user already has a store
+    const existingStore = await ctx.db
+      .query("Store")
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", storeRequest.requesterId))
+      .first();
+    if (existingStore) {
+      return {
+        message: "User already has a store",
+        success: false,
+      };
+    }
+
+    const newStore = await ctx.db.insert("Store", {
+      ownerId: storeRequest.requesterId,
+      storeName: storeRequest.storeName,
+      location: storeRequest.location,
+      storeImage: storeRequest.storeImage || undefined,
+      workHours: storeRequest.workHours,
+      bio: storeRequest.bio,
+      orders: [],
+      products: [],
+      isOpen: false,
+      profit: 0,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    // send email to the store owner
+
+    return {
+      success: newStore ? true : false,
+      message: newStore
+        ? "Store request approved successfully"
+        : "Failed to approve request",
+    };
+  },
+});
+export const rejectStoreRequest = mutation({
+  args: { requestId: v.id("StoreRequests") },
+  handler: async (ctx, { requestId }) => {
+    const storeRequest = await ctx.db.get(requestId);
+    console.log(storeRequest);
+  },
+});
+
+export const getStoreOWner = query({
+  args: { requestId: v.id("StoreRequests") },
+  handler: async (ctx, { requestId }) => {
+    const storeRequest = await ctx.db.get(requestId);
+    if (!storeRequest) {
+      return null;
+    }
+    const owner = await ctx.db.get(storeRequest.requesterId);
+    return owner;
   },
 });
