@@ -2,10 +2,17 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../../../../../convex/_generated/api";
 import RequestCard from "@/components/RequestCard";
+import { isAdmin } from "@/lib/auth";
+import { notFound } from "next/navigation";
 
 const RequestsPage = () => {
   const storeRequests = useQuery(api.storeRequest.getStoreRequests);
-
+  const authUser = useQuery(api.users.current);
+  if (!authUser) return;
+  if (!isAdmin(authUser)) {
+    notFound();
+    return null;
+  }
   return (
     <div className="w-full p-4">
       <h1 className="text-2xl font-bold mb-4">Store Requests</h1>

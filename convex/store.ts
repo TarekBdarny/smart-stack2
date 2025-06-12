@@ -1,4 +1,4 @@
-// import { v } from "convex/values";
+import { v } from "convex/values";
 import { query } from "./_generated/server";
 import { getCurrentUser } from "./users";
 
@@ -15,5 +15,15 @@ export const getStoreForLoggedUser = query({
       .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
       .first();
     return userStore;
+  },
+});
+export const userHasStore = query({
+  args: { ownerId: v.id("users") },
+  handler: async (ctx, { ownerId }) => {
+    const userStore = await ctx.db
+      .query("Store")
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", ownerId))
+      .first();
+    return userStore !== undefined;
   },
 });

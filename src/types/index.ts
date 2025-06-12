@@ -1,6 +1,19 @@
 import { z } from "zod";
 import { Id } from "../../convex/_generated/dataModel";
 
+export const UserSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  avatar: z.string().optional(),
+  clerkId: z.string(),
+  phoneNumber: z.string().max(10).min(10).optional(),
+  location: z.string().optional(),
+  role: z.enum(["OWNER", "STAFF", "CUSTOMER", "ADMIN"]),
+  createdAt: z.number().default(Date.now()),
+  updatedAt: z.number().default(Date.now()),
+  _creationTime: z.number(),
+});
 export const StoreWithoutUserSchema = z.object({
   _id: z.string(),
   ownerId: z.string(),
@@ -44,38 +57,12 @@ export const RequestCardSchema = z.object({
   requesterId: z.string(),
   responseById: z.string().optional(),
   _creationTime: z.number(),
-  requester: z
-    .object({
-      _id: z.string(),
-      name: z.string(),
-      email: z.string().email(),
-      avatar: z.string().optional(),
-      clerkId: z.string(),
-      phoneNumber: z.string().max(10).min(10).optional(),
-      location: z.string().optional(),
-      role: z.enum(["OWNER", "STAFF", "CUSTOMER", "ADMIN"]),
-      createdAt: z.number().default(Date.now()),
-      updatedAt: z.number().default(Date.now()),
-      _creationTime: z.number(),
-    })
-    .optional(),
-  responseBy: z
-    .object({
-      _id: z.string(),
-      name: z.string(),
-      email: z.string().email(),
-      avatar: z.string().optional(),
-      clerkId: z.string(),
-      phoneNumber: z.string().max(10).min(10).optional(),
-      location: z.string().optional(),
-      role: z.enum(["OWNER", "STAFF", "CUSTOMER", "ADMIN"]),
-      createdAt: z.number().default(Date.now()),
-      updatedAt: z.number().default(Date.now()),
-      _creationTime: z.number(),
-    })
-    .optional(),
+  requester: UserSchema.optional(),
+  responseBy: UserSchema.optional(),
 });
+
 export type StoreWithUser = z.infer<typeof StoreWithUserSchema>;
 
 export type StoreWithoutUser = z.infer<typeof StoreWithoutUserSchema>;
 export type RequestCardType = z.infer<typeof RequestCardSchema>;
+export type User = z.infer<typeof UserSchema>;

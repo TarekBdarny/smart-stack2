@@ -1,22 +1,42 @@
-// /lib/auth.ts
-import { User, StoreDetails } from "../types/index";
-export function isAdmin(user: User) {
+import { User } from "@/types";
+import { preloadQuery } from "convex/nextjs";
+import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
+export const isAdmin = (user: User): boolean => {
   if (!user) {
-    throw new Error("User is required");
+    return false;
   }
   return user.role === "ADMIN";
-}
-
-export function ownsStore(user: User, store: StoreDetails) {
-  if (!user || !store) {
-    throw new Error("User is required");
+};
+export const isOwner = (user: User): boolean => {
+  if (!user) {
+    return false;
   }
-  return user.role === "OWNER" && store.ownerId === user.id;
-}
-
-export function worksAtStore(user: User, store: StoreDetails) {
-  if (!user || !store) {
-    throw new Error("User is required");
+  return user.role === "OWNER";
+};
+export const isStaff = (user: User): boolean => {
+  if (!user) {
+    return false;
   }
-  return user.role === "STAFF" && user.storeId === store.id;
-}
+  return user.role === "STAFF";
+};
+export const isCustomer = (user: User): boolean => {
+  if (!user) {
+    return false;
+  }
+  return user.role === "CUSTOMER";
+};
+export const isAllowedToAdminRoutes = (user: User): boolean => {
+  return isAdmin(user);
+};
+export const isAllowedToDeleteStore = (user: User): boolean => {
+  return isAdmin(user) || isOwner(user);
+};
+export const isAllowedToBecomeAnOwner = async (
+  user: User
+): Promise<boolean> => {
+  const hasStore = await preloadQuery(api.store.userHasStore, {
+    ownerId: user._id as Id<"users">,
+  });
+  return (!hasStore && isOwner(user)) || isStaff(user) || isCustomer(user);
+};

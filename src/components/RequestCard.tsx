@@ -20,7 +20,6 @@ const requestDataCard = ({ requestData }: { requestData: RequestCardType }) => {
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
-  console.log(requestData);
   return (
     <Card className="w-full">
       <CardHeader>
