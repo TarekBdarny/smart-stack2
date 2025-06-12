@@ -67,7 +67,6 @@ export const getStoreRequests = query({
 export const approveStoreRequest = mutation({
   args: { requestId: v.id("StoreRequests") },
   handler: async (ctx, { requestId }) => {
-    console.log(process.env.RESEND_API_KEY!);
     const storeRequest = await ctx.db.get(requestId);
 
     if (!storeRequest) {
@@ -85,12 +84,12 @@ export const approveStoreRequest = mutation({
     }
 
     const adminUser = await getCurrentUserOrThrow(ctx);
-    await ctx.db.patch(storeRequest._id, {
-      status: "APPROVED",
-      responseById: adminUser._id,
-    });
+    if (adminUser.role !== "ADMIN")
+      return {
+        message: "Only admin can approve store requests",
+        success: false,
+      };
 
-    // check if the user already has a store
     const existingStore = await ctx.db
       .query("Store")
       .withIndex("by_ownerId", (q) => q.eq("ownerId", storeRequest.requesterId))
@@ -101,6 +100,13 @@ export const approveStoreRequest = mutation({
         success: false,
       };
     }
+
+    await ctx.db.patch(storeRequest._id, {
+      status: "APPROVED",
+      responseById: adminUser._id,
+    });
+
+    // check if the user already has a store
 
     const newStore = await ctx.db.insert("Store", {
       ownerId: storeRequest.requesterId,
@@ -127,10 +133,41 @@ export const approveStoreRequest = mutation({
   },
 });
 export const rejectStoreRequest = mutation({
-  args: { requestId: v.id("StoreRequests") },
-  handler: async (ctx, { requestId }) => {
+  args: { requestId: v.id("StoreRequests"), cause: v.string() },
+  handler: async (ctx, { requestId, cause }) => {
     const storeRequest = await ctx.db.get(requestId);
-    console.log(storeRequest);
+
+    if (!storeRequest) {
+      return {
+        message: "Store request not found",
+        success: false,
+      };
+    }
+    const userRequest = await ctx.db.get(storeRequest.requesterId);
+    if (!userRequest) {
+      return {
+        message: "Requester not found",
+        success: false,
+      };
+    }
+
+    const adminUser = await getCurrentUserOrThrow(ctx);
+    if (adminUser.role !== "ADMIN")
+      return {
+        message: "Only admin can reject store requests",
+        success: false,
+      };
+
+    await ctx.db.patch(storeRequest._id, {
+      status: "REJECTED",
+      cause,
+      responseById: adminUser._id,
+    });
+
+    return {
+      success: true,
+      message: "Store request rejected successfully",
+    };
   },
 });
 

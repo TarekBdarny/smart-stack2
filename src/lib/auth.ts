@@ -38,5 +38,14 @@ export const isAllowedToBecomeAnOwner = async (
   const hasStore = await preloadQuery(api.store.userHasStore, {
     ownerId: user._id as Id<"users">,
   });
-  return (!hasStore && isOwner(user)) || isStaff(user) || isCustomer(user);
+  console.log(hasStore._valueJSON);
+  return (
+    (!hasStore._valueJSON && isOwner(user)) || isStaff(user) || isCustomer(user)
+  );
+};
+export const isAllowedToCreateStore = async (user: User): Promise<boolean> => {
+  const hasStore = await preloadQuery(api.store.userHasStore, {
+    ownerId: user._id as Id<"users">,
+  });
+  return !hasStore._valueJSON;
 };

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { Id } from "../../convex/_generated/dataModel";
 
 export const UserSchema = z.object({
   _id: z.string(),
@@ -57,6 +56,7 @@ export const RequestCardSchema = z.object({
   updatedAt: z.number(),
   requesterId: z.string(),
   responseById: z.string().optional(),
+  cause: z.string().optional(),
   _creationTime: z.number(),
   requester: UserSchema.optional(),
   responseBy: UserSchema.optional(),

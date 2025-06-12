@@ -2,7 +2,6 @@
 import React, {
   ChangeEvent,
   Dispatch,
-  FormEvent,
   SetStateAction,
   useRef,
   useState,
@@ -32,22 +31,47 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ImageIcon, Send, Upload } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  AlertCircle,
+  ArrowUpRight,
+  Home,
+  Send,
+  ShieldCheck,
+  Store,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../../../convex/_generated/api";
 import { Id } from "../../../../../../convex/_generated/dataModel";
+import {
+  isAdmin,
+  isAllowedToBecomeAnOwner,
+  isAllowedToCreateStore,
+} from "@/lib/auth";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const StorePage = () => {
+  const router = useRouter();
+
   const [open, setOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const currentUser = useQuery(api.users.current);
   const generateUploadUrl = useMutation(api.file.generateUploadUrl);
   const createStoreRequest = useMutation(api.storeRequest.createStoreRequest);
-
   const formSchema = z.object({
     storeName: z
       .string()
@@ -77,6 +101,18 @@ const StorePage = () => {
       storeImage: "",
     },
   });
+
+  if (!currentUser) return;
+
+  if (isAdmin(currentUser)) {
+    return <NotAllowed text="Admin's cannot request a store." isAdmin />;
+  }
+  if (!isAllowedToBecomeAnOwner(currentUser)) {
+    return (
+      <NotAllowed text="Store owners can have only 1 store." isAdmin={false} />
+    );
+  }
+
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -114,6 +150,8 @@ const StorePage = () => {
         : undefined,
     });
     setOpen(false);
+    toast.success("Store request submitted successfully.");
+    router.push("/");
   };
 
   return (
@@ -281,6 +319,69 @@ const StoreDialog = ({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+};
+const NotAllowed = ({ text, isAdmin }: { text: string; isAdmin: boolean }) => {
+  return (
+    <div className=" w-full bg-background flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center space-y-4">
+          {/* Icon */}
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-destructive/10">
+            {isAdmin ? (
+              <ShieldCheck className="h-8 w-8 text-destructive" />
+            ) : (
+              <Store className="h-8 w-8 text-destructive" />
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <CardTitle className="text-2xl font-bold">
+              Store Request Not Available
+            </CardTitle>
+            <CardDescription className="text-base">{text}</CardDescription>
+          </div>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          {/* Role Badge */}
+          <div className="flex justify-center">
+            <Badge
+              variant={isAdmin ? "destructive" : "secondary"}
+              className="text-sm"
+            >
+              {isAdmin ? "Administrator" : "Store Owner"}
+            </Badge>
+          </div>
+
+          {/* Information Alert */}
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {isAdmin
+                ? "Use the admin dashboard to manage all stores and system settings."
+                : "Manage your existing store through the store dashboard or contact support for additional store requests."}
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+
+        <CardFooter className="flex flex-col space-y-2">
+          <Button asChild variant={"action"} className="w-full" size="lg">
+            <Link href={"/"}>
+              <Home className="h-4 w-4 mr-2" />
+              Go to Home
+            </Link>
+          </Button>
+
+          <Button asChild variant="outline" className="w-full" size="lg">
+            <Link href={"/dashboard"}>
+              <ArrowUpRight className="h-4 w-4 mr-2" />
+              Visit Dashboard
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
 };
 export default StorePage;

@@ -6,6 +6,7 @@ import {
   Mail,
   MapPin,
   NotebookText,
+  ShieldCheck,
   Store,
   User,
 } from "lucide-react";
@@ -15,6 +16,7 @@ import { Badge } from "./ui/badge";
 import { Skeleton } from "./ui/skeleton";
 import RequestCardButton from "./RequestCardButton";
 import { Separator } from "./ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const requestDataCard = ({ requestData }: { requestData: RequestCardType }) => {
   return (
@@ -82,18 +84,25 @@ const requestDataCard = ({ requestData }: { requestData: RequestCardType }) => {
       {/* admin response */}
       {requestData.responseBy ? (
         <CardFooter className="flex flex-col items-start gap-4 w-full border  border-primary/80 bg-primary/10 rounded-lg p-4 ">
-          <p className="text-left">Responded by:</p>
+          <p
+            className={`text-left ${requestData.status === "APPROVED" ? "text-green-300" : requestData.status === "REJECTED" && "text-red-400"}`}
+          >
+            {requestData.status === "APPROVED"
+              ? "Approved by:"
+              : "Rejected by:"}
+          </p>
           <RequestCardAvatar
             email={requestData.responseBy?.email}
             name={requestData.responseBy?.name}
             avatar={requestData.responseBy?.avatar}
             use="admin"
           />
-          <p>
-            {
-              // the cause of the rejection
-            }
-          </p>
+          {requestData.status === "REJECTED" && (
+            <p>
+              Reason: <br />
+              {requestData.cause}
+            </p>
+          )}
         </CardFooter>
       ) : (
         <p className="p-4">No response yet</p>
@@ -138,6 +147,16 @@ const RequestCardAvatar = ({
         <h2 className="text-lg font-semibold">
           <User className="inline mr-1" />
           {name}
+          {use !== "requester" && (
+            <Tooltip>
+              <TooltipTrigger className="cursor-pointer">
+                <ShieldCheck className="inline ml-2 text-primary" />
+              </TooltipTrigger>
+              <TooltipContent className="bg-background">
+                <p>Admin</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </h2>
         {use === "requester" && (
           <p className="text-sm text-gray-600">
