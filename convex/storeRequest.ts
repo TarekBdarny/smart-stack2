@@ -45,9 +45,51 @@ export const getStoreRequest = query({
   },
 });
 export const getStoreRequests = query({
-  args: {},
-  handler: async (ctx) => {
-    const requests = await ctx.db.query("StoreRequests").collect();
+  args: {
+    orderBy: v.string(),
+  },
+  handler: async (ctx, { orderBy }) => {
+    if (orderBy !== "asc" && orderBy !== "desc") return;
+    const requests = await ctx.db
+      .query("StoreRequests")
+      .order(orderBy)
+      .collect();
+    return Promise.all(
+      requests.map(async (request) => {
+        const user = await ctx.db.get(request.requesterId);
+        let responseByUser = null;
+        if (request.responseById) {
+          responseByUser = await ctx.db.get(request.responseById);
+        }
+        return {
+          ...request,
+          requester: user,
+          responseBy: responseByUser || null,
+        };
+      })
+    );
+  },
+});
+export const getStoreRequestsByStatus = query({
+  args: {
+    status: v.string(),
+    orderBy: v.string(),
+    all: v.boolean(),
+  },
+  handler: async (ctx, { status, all, orderBy }) => {
+    let requests = null;
+    if (status !== "PENDING" && status !== "APPROVED" && status !== "REJECTED")
+      return;
+    if (orderBy !== "asc" && orderBy !== "desc") return;
+    if (all) {
+      requests = await ctx.db.query("StoreRequests").order("desc").collect();
+    } else {
+      requests = await ctx.db
+        .query("StoreRequests")
+        .withIndex("by_status", (q) => q.eq("status", status))
+        .order("desc")
+        .collect();
+    }
     return Promise.all(
       requests.map(async (request) => {
         const user = await ctx.db.get(request.requesterId);
